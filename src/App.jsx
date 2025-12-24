@@ -1,30 +1,26 @@
-import React, { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Cart from "./pages/Cart";
-import Address from "./pages/Address";
-import Payment from "./pages/Payment";
-import Orders from "./pages/Orders";
+import CartPage from "./components/CartPage";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 
-export default function App() {
-  const [searchText, setSearchText] = useState("");
+function App() {
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
 
   return (
-    <BrowserRouter>
-      <Navbar searchText={searchText} setSearchText={setSearchText} />
-
+    <Router>
+      <Navbar token={token} setToken={setToken}/>
       <Routes>
-        <Route path="/" element={<Home searchText={searchText} />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/address" element={<Address />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/orders" element={<Orders />} />
+        <Route path="/" element={<Home token={token}/>}/>
+        <Route path="/cart" element={<CartPage token={token}/>}/>
+        <Route path="/login" element={<Login setToken={setToken}/>}/>
+        <Route path="/signup" element={<Signup/>}/>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
+
+export default App;
