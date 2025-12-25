@@ -6,6 +6,8 @@ import Home from "./pages/Home";
 import CartPage from "./components/CartPage";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import Footer from "./components/Footer";
+import Profile from "./Pages/Profile";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -18,6 +20,7 @@ function App() {
         <Route path="/cart" element={<CartPage token={token}/>}/>
         <Route path="/login" element={<Login setToken={setToken}/>}/>
         <Route path="/signup" element={<Signup/>}/>
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
