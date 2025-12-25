@@ -108,6 +108,12 @@ export default function Navbar({ token, setToken }) {
               >
                 Profile
               </Link>
+              <Link
+                to="/orders"
+                className="bg-white text-blue-600 px-4 py-1 rounded font-semibold hover:bg-gray-100"
+              >
+                My Orders
+              </Link>
 
               <button
                 onClick={handleLogout}
