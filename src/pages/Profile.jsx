@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api";
 
 export default function Profile() {
@@ -32,76 +31,120 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f3f6] flex justify-center p-6">
-      <div className="bg-white w-full max-w-3xl p-6 rounded shadow-sm">
-        <h2 className="text-lg font-semibold border-b pb-3 mb-6">
-          Personal Information
-        </h2>
+    <div className="min-h-screen bg-gray-100 py-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-12 gap-4">
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Username & Email */}
-          <div className="flex gap-6">
-            <div className="flex-1">
-              <label className="text-xs font-medium text-gray-500 mb-1 block">
-                Username
-              </label>
+        {/* LEFT SIDEBAR */}
+        <div className="col-span-12 md:col-span-3 bg-white border">
+          <div className="p-4 border-b flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              👤
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Hello,</p>
+              <p className="font-semibold text-sm">{user.username}</p>
+            </div>
+          </div>
+
+          <div className="p-4 text-sm space-y-4">
+            <div className="font-semibold text-gray-700">MY ORDERS</div>
+
+            <div>
+              <p className="font-semibold text-gray-700 mb-2">
+                ACCOUNT SETTINGS
+              </p>
+              <ul className="space-y-2">
+                <li className="text-blue-600 font-medium">
+                  Profile Information
+                </li>
+                <li className="text-gray-600 hover:text-blue-600 cursor-pointer">
+                  Manage Addresses
+                </li>
+                <li className="text-gray-600 hover:text-blue-600 cursor-pointer">
+                  PAN Card Information
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-700 mb-2">PAYMENTS</p>
+              <ul className="space-y-2">
+                <li className="text-gray-600">Gift Cards ₹0</li>
+                <li className="text-gray-600">Saved UPI</li>
+                <li className="text-gray-600">Saved Cards</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT CONTENT */}
+        <div className="col-span-12 md:col-span-9 bg-white border">
+          <div className="border-b px-6 py-4 flex justify-between">
+            <h2 className="text-lg font-semibold">Personal Information</h2>
+            <span className="text-blue-600 text-sm cursor-pointer">
+              Edit
+            </span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+
+            {/* Name */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
-                className="w-full border px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                type="text"
+                className="border px-3 py-2 text-sm rounded-sm"
                 value={user.username}
                 onChange={(e) =>
                   setUser({ ...user, username: e.target.value })
                 }
+                placeholder="Username"
               />
             </div>
 
-            <div className="flex-1">
-              <label className="text-xs font-medium text-gray-500 mb-1 block">
-                Email
-              </label>
+            {/* Email */}
+            <div>
+              <label className="text-sm font-medium">Email Address</label>
               <input
-                className="w-full border px-3 py-2 text-sm bg-gray-100 cursor-not-allowed"
+                type="email"
+                className="w-full border px-3 py-2 text-sm rounded-sm bg-gray-100 mt-1"
                 value={user.email}
                 disabled
               />
             </div>
-          </div>
 
-          {/* Phone */}
-          <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">
-              Phone
-            </label>
-            <input
-              className="w-full border px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-              value={user.phone}
-              onChange={(e) =>
-                setUser({ ...user, phone: e.target.value })
-              }
-            />
-          </div>
+            {/* Mobile */}
+            <div>
+              <label className="text-sm font-medium">Mobile Number</label>
+              <input
+                type="text"
+                className="w-full border px-3 py-2 text-sm rounded-sm mt-1"
+                value={user.phone}
+                onChange={(e) =>
+                  setUser({ ...user, phone: e.target.value })
+                }
+              />
+            </div>
 
-          {/* Address */}
-          <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">
-              Address
-            </label>
-            <textarea
-              className="w-full border px-3 py-2 text-sm resize-none h-20 focus:outline-none focus:border-blue-500"
-              value={user.address}
-              onChange={(e) =>
-                setUser({ ...user, address: e.target.value })
-              }
-            />
-          </div>
+            {/* Address */}
+            <div>
+              <label className="text-sm font-medium">Address</label>
+              <textarea
+                className="w-full border px-3 py-2 text-sm rounded-sm mt-1 resize-none h-24"
+                value={user.address}
+                onChange={(e) =>
+                  setUser({ ...user, address: e.target.value })
+                }
+              />
+            </div>
 
-          {/* Button */}
-          <button
-            type="submit"
-            className="bg-[#2874f0] text-white px-6 py-2 text-sm font-semibold hover:bg-blue-600 transition"
-          >
-            SAVE CHANGES
-          </button>
-        </form>
+            <button
+              type="submit"
+              className="bg-[#2874f0] text-white px-8 py-2 text-sm font-semibold rounded-sm hover:bg-blue-600"
+            >
+              Save Changes
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

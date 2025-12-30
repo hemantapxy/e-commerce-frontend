@@ -20,7 +20,11 @@ export default function Orders() {
   }, []);
 
   if (loading)
-    return <p className="text-center text-gray-500 mt-10">Loading orders...</p>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+      </div>
+    );
 
   if (orders.length === 0)
     return <p className="text-center text-gray-500 mt-10">No orders yet.</p>;
