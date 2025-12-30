@@ -127,12 +127,12 @@ export default function Navbar({ token, setToken, dark, setDark }) {
         <div className="flex items-center gap-4 whitespace-nowrap relative">
 
           {/* Dark mode toggle */}
-          <button
+          {/* <button
             onClick={() => setDark(!dark)}
             className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
             {dark ? "☀ Day" : "🌙 Night"}
-          </button>
+          </button> */}
 
           {/* Auth buttons */}
           {!token && (
