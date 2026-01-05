@@ -6,7 +6,6 @@ export default function ProductList({ token }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -22,10 +21,9 @@ export default function ProductList({ token }) {
     fetchProducts();
   }, []);
 
-  // Handle add to cart
   const handleAdd = async (productId) => {
     try {
-      await addToCart(productId, token);
+      await addToCart(productId);
       alert("Product added to cart!");
     } catch (err) {
       alert(err.response?.data?.message || "Failed to add product");

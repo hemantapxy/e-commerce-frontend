@@ -30,10 +30,10 @@ export default function Navbar({ token, setToken, dark, setDark }) {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     setToken("");
@@ -45,16 +45,22 @@ export default function Navbar({ token, setToken, dark, setDark }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
-    alert(`Searching for "${search}"`);
+    navigate(`/search?query=${encodeURIComponent(search.trim())}`);
     setSearch("");
     setSuggestions([]);
   };
 
-  // Search input change
+  // Fetch suggestions (local demo, can be API)
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearch(value);
 
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    // Optional: fetch from backend instead
     const dummyProducts = [
       "iPhone 15",
       "Samsung Galaxy S24",
@@ -66,21 +72,16 @@ export default function Navbar({ token, setToken, dark, setDark }) {
       "Canon Camera",
     ];
 
-    if (value.trim()) {
-      setSuggestions(
-        dummyProducts.filter((item) =>
-          item.toLowerCase().includes(value.toLowerCase())
-        )
-      );
-    } else {
-      setSuggestions([]);
-    }
+    setSuggestions(
+      dummyProducts.filter((item) =>
+        item.toLowerCase().includes(value.toLowerCase())
+      )
+    );
   };
 
   return (
     <nav className="bg-blue-600 dark:bg-gray-800 px-4 py-2 shadow transition-colors">
       <div className="max-w-7xl mx-auto flex items-center gap-4">
-
         {/* Logo */}
         <Link
           to="/"
@@ -93,10 +94,10 @@ export default function Navbar({ token, setToken, dark, setDark }) {
         <form onSubmit={handleSearch} className="flex-1 relative">
           <input
             type="text"
-            placeholder="Search for products, brands and more"
+            placeholder="Search products, brands..."
             value={search}
             onChange={handleSearchChange}
-            className="w-full h-10 px-4 rounded-md bg-blue-500 dark:bg-gray-700 text-white placeholder-white placeholder-opacity-80 focus:outline-none shadow"
+            className="w-full h-10 px-4 rounded-md bg-blue-500 dark:bg-gray-700 text-white placeholder-white focus:outline-none shadow"
           />
           <button
             type="submit"
@@ -112,7 +113,8 @@ export default function Navbar({ token, setToken, dark, setDark }) {
                   key={index}
                   className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
                   onClick={() => {
-                    setSearch(item);
+                    navigate(`/search?query=${encodeURIComponent(item)}`);
+                    setSearch("");
                     setSuggestions([]);
                   }}
                 >
@@ -123,18 +125,8 @@ export default function Navbar({ token, setToken, dark, setDark }) {
           )}
         </form>
 
-        {/* Right side buttons */}
+        {/* Right side auth */}
         <div className="flex items-center gap-4 whitespace-nowrap relative">
-
-          {/* Dark mode toggle */}
-          {/* <button
-            onClick={() => setDark(!dark)}
-            className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            {dark ? "☀ Day" : "🌙 Night"}
-          </button> */}
-
-          {/* Auth buttons */}
           {!token && (
             <>
               <Link
@@ -152,7 +144,6 @@ export default function Navbar({ token, setToken, dark, setDark }) {
             </>
           )}
 
-          {/* User dropdown */}
           {token && (
             <div ref={dropdownRef} className="relative">
               <button

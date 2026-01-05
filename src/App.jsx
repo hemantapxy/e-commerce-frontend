@@ -1,11 +1,12 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
-import Home from "./pages/Home";
+import Home from "./Pages/Home";
 import CartPage from "./components/CartPage";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -14,6 +15,20 @@ import Orders from "./components/Order";
 import Checkout from "./components/Checkout";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+import SearchResults from "./Pages/SearchResults";
+import ProductDetails from "./Pages/ProductDetails";
+import Contact from "./Pages/Contact";
+import About from "./Pages/About";
+import Careers from "./Pages/Careers";
+import CorporateInfo from "./Pages/CorporateInfo";
+import Payments from "./Pages/Payments";
+import Shipping from "./Pages/Shipping";
+import Cancellation from "./Pages/Cancellation";
+import FAQ from "./Pages/Faq";
+import Returns from "./Pages/Return";
+import Terms from "./Pages/Terms";
+import Security from "./Pages/Security";
+import Privacy from "./Pages/Privacy";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -50,6 +65,20 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="*" element={<div>Page Not Found</div>} />
+        <Route path="/search" element={<SearchResults token={token} />} />
+        <Route path="/product/:id" element={<ProductDetails token={token} />} />
+        <Route path="/Contact" element={<Contact />} />
+        <Route path="/About" element={<About />} />
+        <Route path="/Careers" element={<Careers />} />
+        <Route path="/CorporateInfo" element={<CorporateInfo />} />
+        <Route path="/Payments" element={<Payments />} />
+        <Route path="/Shipping" element={<Shipping />} />
+        <Route path="/Cancellation" element={<Cancellation />} />
+        <Route path="/FAQ" element={<FAQ />} />
+        <Route path="/Returns" element={<Returns />} />
+        <Route path="/Terms" element={<Terms />} />
+        <Route path="/Security" element={<Security />} />
+        <Route path="/Privacy" element={<Privacy />} />
       </Routes>
 
       <Footer />
@@ -57,3 +86,6 @@ function App() {
   );
 }
 export default App;
+
+
+
