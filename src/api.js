@@ -44,6 +44,9 @@ export const verifyRazorpayPayment = (paymentData) =>
 export const getProductById = (id) =>
   API.get(`/products/${id}`);
 
-
+// ================= REVIEWS =================
+ 
+export const submitReview = (productId, review) =>
+  API.post(`/products/${productId}/review`, review);
 
 export default API;

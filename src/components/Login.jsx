@@ -120,4 +120,4 @@ export default function Login({ setToken }) {
       </motion.div>
     </div>
   );
-}
+}     
