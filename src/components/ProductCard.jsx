@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, Heart } from "lucide-react"; // Install lucide-react for professional icons
+import { Star, Heart } from "lucide-react";
 
 export default function ProductCard({ product, token, handleAdd, showActions = true }) {
   const navigate = useNavigate();
@@ -16,6 +16,9 @@ export default function ProductCard({ product, token, handleAdd, showActions = t
     }
   };
 
+  // ✅ Use main image or first variant image
+  const imageSrc = product.image || product.variants?.[0]?.image || "/fallback.png";
+
   return (
     <div 
       onClick={goToDetails}
@@ -26,10 +29,10 @@ export default function ProductCard({ product, token, handleAdd, showActions = t
         <Heart size={18} />
       </button>
 
-      {/* Image Container with Aspect Ratio */}
+      {/* Image Container */}
       <div className="h-44 w-full flex items-center justify-center mb-3 overflow-hidden">
         <img
-          src={product.image}
+          src={imageSrc}
           alt={product.name}
           className="max-h-full max-w-full object-contain transform group-hover:scale-105 transition-transform duration-300"
         />
@@ -49,7 +52,7 @@ export default function ProductCard({ product, token, handleAdd, showActions = t
           <span className="text-gray-400 text-[11px] font-medium">(1,240)</span>
         </div>
 
-        {/* Pricing Hierarchy */}
+        {/* Pricing */}
         <div className="mt-2 flex items-center gap-2 justify-center md:justify-start">
           <span className="text-base font-bold text-gray-900 dark:text-white">₹{product.price}</span>
           <span className="text-gray-400 line-through text-xs font-medium">₹{Math.round(product.price * 1.3)}</span>
@@ -60,24 +63,12 @@ export default function ProductCard({ product, token, handleAdd, showActions = t
       {/* Action Buttons */}
       {showActions && (
         <div className="mt-3 flex gap-2">
-          {product.affiliateUrl ? (
-            <a
-              href={product.affiliateUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex-1 bg-[#fb641b] text-white py-2 text-xs font-bold rounded-sm text-center uppercase shadow-sm"
-            >
-              Buy Now
-            </a>
-          ) : (
-            <button
-              onClick={onAddClick}
-              className="flex-1 bg-[#ff9f00] text-white py-2 text-xs font-bold rounded-sm uppercase shadow-sm"
-            >
-              Add to Cart
-            </button>
-          )}
+          <button
+            onClick={onAddClick}
+            className="flex-1 bg-[#ff9f00] text-white py-2 text-xs font-bold rounded-sm uppercase shadow-sm"
+          >
+            Add to Cart
+          </button>
         </div>
       )}
     </div>
