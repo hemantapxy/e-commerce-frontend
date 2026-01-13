@@ -99,14 +99,18 @@ export default function CartPage({ token }) {
           <div className="bg-white shadow-sm rounded-sm overflow-hidden">
             {cart.items.map((item) => (
               <div key={item.product._id} className="p-4 md:p-6 border-b border-gray-100 flex flex-col md:flex-row gap-6">
+                
                 {/* Image Section */}
-                <div className="w-28 h-28 mx-auto md:mx-0 flex-shrink-0">
+                <div 
+                  className="w-28 h-28 mx-auto md:mx-0 flex-shrink-0 cursor-pointer"
+                  onClick={() => navigate(`/product/${item.product._id}`)}
+                >
                   <img src={item.product.image} alt="" className="w-full h-full object-contain" />
                 </div>
 
                 {/* Content Section */}
-                <div className="flex-1">
-                  <h2 className="text-base md:text-lg text-gray-800 line-clamp-1 hover:text-blue-600 cursor-pointer">
+                <div className="flex-1 cursor-pointer" onClick={() => navigate(`/product/${item.product._id}`)}>
+                  <h2 className="text-base md:text-lg text-gray-800 line-clamp-1 hover:text-blue-600">
                     {item.product.name}
                   </h2>
                   <p className="text-sm text-gray-500 mt-1 uppercase">Seller: E-SHOP RETAIL</p>
