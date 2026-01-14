@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import { getProducts, addToCart } from "../api";
 
-export default function ProductList({ token }) {
+export default function ProductList({ token, category }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const res = await getProducts();
+        const res = await getProducts(category ? { category } : {});
         setProducts(res.data);
       } catch (err) {
         console.error("Failed to fetch products:", err);
@@ -19,7 +20,7 @@ export default function ProductList({ token }) {
     };
 
     fetchProducts();
-  }, []);
+  }, [category]);
 
   const handleAdd = async (productId) => {
     try {
@@ -32,32 +33,28 @@ export default function ProductList({ token }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+      <div className="flex justify-center items-center h-40">
+        <div className="w-10 h-10 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (products.length === 0) {
     return (
-      <p className="text-center mt-10 text-gray-500 text-lg">
-        No products available.
-      </p>
+      <p className="text-center text-gray-500 text-lg">No products found.</p>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((p) => (
-          <ProductCard
-            key={p._id}
-            product={p}
-            token={token}
-            handleAdd={handleAdd}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {products.map((p) => (
+        <ProductCard
+          key={p._id}
+          product={p}
+          token={token}
+          handleAdd={handleAdd}
+        />
+      ))}
     </div>
   );
 }

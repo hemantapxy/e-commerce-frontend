@@ -31,6 +31,8 @@ import Security from "./Pages/Security";
 import Privacy from "./Pages/Privacy";
 import BecomeSeller from "./Pages/BecomeSeller";
 
+import Flights from "./Pages/Flights";
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
 
@@ -81,6 +83,7 @@ function App() {
         <Route path="/Security" element={<Security />} />
         <Route path="/Privacy" element={<Privacy />} />
         <Route path="/seller" element={<BecomeSeller />} />
+        <Route path="/flights" element={<Flights />} />
       </Routes>
 
       <Footer />

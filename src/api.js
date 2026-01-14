@@ -23,7 +23,10 @@ export const resetPassword = (token, password) =>
   API.post(`/auth/reset-password/${token}`, { password });
 
 // ================= PRODUCTS =================
-export const getProducts = () => API.get("/products"); // GET /api/products
+
+// ================= PRODUCTS =================
+export const getProducts = (params = {}) => API.get("/products", { params });
+ // GET /api/products
 
 // ================= CART =================
 export const getCart = () => API.get("/cart");
