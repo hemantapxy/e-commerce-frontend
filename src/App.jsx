@@ -32,6 +32,11 @@ import Privacy from "./Pages/Privacy";
 import BecomeSeller from "./Pages/BecomeSeller";
 
 import Flights from "./Pages/Flights";
+import FlightDetails from "./Pages/FlightDetails";
+import BookingPage from "./Pages/BookingPage";
+import PaymentPage from "./Pages/PaymentPage";
+import TicketPage from "./Pages/TicketPage";           
+import BookingSuccess from "./Pages/BookingSuccess";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -83,7 +88,15 @@ function App() {
         <Route path="/Security" element={<Security />} />
         <Route path="/Privacy" element={<Privacy />} />
         <Route path="/seller" element={<BecomeSeller />} />
-        <Route path="/flights" element={<Flights />} />
+       <Route path="/flights" element={<Flights />} />
+<Route path="/flights/:id" element={<FlightDetails />} />
+
+        <Route path="/booking/:id" element={<BookingPage />} />
+        <Route path="/payment/:id" element={<PaymentPage />} />
+          <Route path="/ticket" element={<TicketPage />} />
+
+      
+        <Route path="/booking-success" element={<BookingSuccess />} />
       </Routes>
 
       <Footer />

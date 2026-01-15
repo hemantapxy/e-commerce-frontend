@@ -1,142 +1,161 @@
-import React, { useState } from "react";
-
-const flightBanners = [
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=800&q=80",
-  "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80",
-];
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getFlights } from "../api";
+import FlightSlider from "../components/FlightSlider";
 
 export default function Flights() {
-  const [tripType, setTripType] = useState("oneway");
-  const [currentBanner, setCurrentBanner] = useState(0);
+  const navigate = useNavigate();
+  const [flights, setFlights] = useState([]);
+  const [search, setSearch] = useState({ from: "", to: "", departureDate: "" });
 
-  // Auto slide every 5 seconds
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentBanner((prev) => (prev === flightBanners.length - 1 ? 0 : prev + 1));
-    }, 5000);
-    return () => clearInterval(interval);
+  useEffect(() => {
+    fetchFlights();
   }, []);
 
-  const prevSlide = () => {
-    setCurrentBanner((prev) => (prev === 0 ? flightBanners.length - 1 : prev - 1));
+  const fetchFlights = async (params = {}) => {
+    try {
+      const { data } = await getFlights(params);
+      setFlights(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const nextSlide = () => {
-    setCurrentBanner((prev) => (prev === flightBanners.length - 1 ? 0 : prev + 1));
+  const handleChange = (e) => {
+    setSearch({ ...search, [e.target.name]: e.target.value });
+  };
+
+  const handleSearch = () => {
+    fetchFlights(search);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      {/* FLIGHT SLIDER */}
-      <div className="relative max-w-6xl mx-auto mt-6 overflow-hidden rounded-lg shadow-lg">
-        {/* Slides */}
-        <div
-          className="flex transition-transform duration-500"
-          style={{ transform: `translateX(-${currentBanner * 100}%)` }}
-        >
-          {flightBanners.map((img, index) => (
-            <img
-              key={index}
-              src={img}
-              alt={`Banner ${index + 1}`}
-              className="w-full flex-shrink-0 h-64 md:h-80 object-cover"
-            />
-          ))}
-        </div>
-
-        {/* Arrows */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full hover:bg-opacity-70 transition"
-        >
-          &#10094;
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full hover:bg-opacity-70 transition"
-        >
-          &#10095;
-        </button>
-
-        {/* Dots */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-          {flightBanners.map((_, index) => (
-            <span
-              key={index}
-              onClick={() => setCurrentBanner(index)}
-              className={`w-3 h-3 rounded-full cursor-pointer ${
-                currentBanner === index ? "bg-white" : "bg-gray-400"
-              }`}
-            ></span>
-          ))}
-        </div>
-
-        {/* Overlay Text */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white bg-black bg-opacity-20">
-          <h1 className="text-3xl md:text-4xl font-bold">Flight Bookings ✈️</h1>
-          <p className="text-sm md:text-base mt-2">
-            Domestic & International Flights at Best Prices
-          </p>
+    <div className="min-h-screen bg-[#f1f3f6] font-sans">
+      
+      {/* FLIPKART STYLE SEARCH HEADER */}
+      <div className="bg-fuchsia-600 pb-10 pt-6 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+            Book Flights with <span className="text-[#ffe500] italic">E-CART Travel</span>
+          </h1>
+          
+          <div className="bg-white p-4 rounded-sm shadow-xl grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">From</label>
+              <input
+                name="from"
+                value={search.from}
+                onChange={handleChange}
+                placeholder="Enter City"
+                className="border border-gray-200 p-3 rounded-sm focus:outline-none focus:border-blue-500 text-sm font-semibold"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">To</label>
+              <input
+                name="to"
+                value={search.to}
+                onChange={handleChange}
+                placeholder="Enter City"
+                className="border border-gray-200 p-3 rounded-sm focus:outline-none focus:border-blue-500 text-sm font-semibold"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Departure</label>
+              <input
+                name="departureDate"
+                type="date"
+                value={search.departureDate}
+                onChange={handleChange}
+                className="border border-gray-200 p-3 rounded-sm focus:outline-none focus:border-blue-500 text-sm font-semibold"
+              />
+            </div>
+            <button
+              onClick={handleSearch}
+              className="bg-[#fb641b] hover:bg-[#f4511e] text-white py-3 px-8 rounded-sm font-bold shadow-md transition-all uppercase tracking-tight"
+            >
+              Search
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* SEARCH CARD */}
-      <div className="max-w-6xl mx-auto mt-6 bg-white rounded shadow p-6">
-
-        {/* Trip Type Tabs */}
-        <div className="flex gap-6 border-b pb-3 mb-6">
-          {[
-            { id: "oneway", label: "One Way" },
-            { id: "roundtrip", label: "Round Trip" },
-            { id: "multicity", label: "Multi City" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setTripType(tab.id)}
-              className={`text-sm font-medium pb-2 ${
-                tripType === tab.id
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div className="max-w-6xl mx-auto px-2 -mt-6 pb-20">
+        
+        {/* TRENDING SLIDER SECTION */}
+        <div className="bg-white p-4 rounded-sm shadow-sm border border-gray-200 mb-6">
+          <FlightSlider />
         </div>
 
-        {/* Form */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-          <div className="border rounded p-3">
-            <p className="text-xs text-gray-500">FROM</p>
-            <input className="w-full outline-none font-semibold" placeholder="DEL - Delhi" />
+        {/* FLIGHT LISTING */}
+        <div className="bg-white rounded-sm shadow-sm border border-gray-200">
+          
+          {/* List Header */}
+          <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <h2 className="font-bold text-gray-800 uppercase text-xs tracking-wider">
+              {flights.length} Flights Available
+            </h2>
+            <div className="text-xs text-blue-600 font-bold cursor-pointer">SORT BY PRICE ↓</div>
           </div>
-          <div className="border rounded p-3">
-            <p className="text-xs text-gray-500">TO</p>
-            <input className="w-full outline-none font-semibold" placeholder="BOM - Mumbai" />
-          </div>
-          <div className="border rounded p-3">
-            <p className="text-xs text-gray-500">DEPARTURE</p>
-            <input type="date" className="w-full outline-none" />
-          </div>
-          {tripType === "roundtrip" && (
-            <div className="border rounded p-3">
-              <p className="text-xs text-gray-500">RETURN</p>
-              <input type="date" className="w-full outline-none" />
+
+          {flights.length === 0 ? (
+            <div className="py-20 text-center">
+              <p className="text-gray-400">No flights found. Try a different city.</p>
             </div>
-          )}
-          <div className="border rounded p-3">
-            <p className="text-xs text-gray-500">TRAVELLERS & CLASS</p>
-            <p className="font-semibold">1 Adult, Economy</p>
-          </div>
-        </div>
+          ) : (
+            flights.map((flight) => (
+              <div
+                key={flight._id}
+                className="group p-6 border-b border-gray-100 hover:bg-gray-50/50 flex flex-col md:flex-row justify-between items-center gap-6 transition-colors"
+              >
+                {/* Airline & Number */}
+                <div className="flex items-center gap-4 w-full md:w-1/4">
+                  <div className="w-12 h-12 bg-gray-50 rounded flex items-center justify-center border border-gray-100 p-2">
+                    <img src={flight.image} alt="logo" className="object-contain" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-800 leading-tight">{flight.airline}</p>
+                    <p className="text-[11px] text-gray-500 font-medium uppercase mt-1">{flight.flightNumber}</p>
+                  </div>
+                </div>
 
-        {/* Search Button */}
-        <div className="flex justify-center mt-6">
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-10 py-3 rounded font-bold text-lg">
-            SEARCH FLIGHTS
-          </button>
+                {/* Departure & Arrival */}
+                <div className="flex-1 flex items-center justify-between max-w-md w-full">
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-gray-900">{flight.departureTime}</p>
+                    <p className="text-xs text-gray-500 font-bold uppercase">{flight.from}</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <p className="text-[10px] text-gray-400 font-bold mb-1">{flight.duration || '2h 10m'}</p>
+                    <div className="w-24 h-[1px] bg-gray-300 relative">
+                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px]">✈</div>
+                    </div>
+                    <p className="text-[10px] text-green-600 font-bold mt-1 uppercase tracking-tighter">Non-stop</p>
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-gray-900">{flight.arrivalTime}</p>
+                    <p className="text-xs text-gray-500 font-bold uppercase">{flight.to}</p>
+                  </div>
+                </div>
+
+                {/* Price & Action */}
+                <div className="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto md:pl-10 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0">
+                  <div className="text-left md:text-right">
+                    <p className="text-2xl font-black text-gray-900 leading-none">₹{flight.price.toLocaleString()}</p>
+                    <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase line-through">₹{Math.round(flight.price * 1.2)}</p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/flights/${flight._id}`, { state: { flight } })}
+                    className="md:mt-3 bg-[#fb641b] hover:bg-[#f4511e] text-white text-xs font-black py-2.5 px-10 rounded-sm uppercase tracking-tighter transition-all shadow-sm"
+                  >
+                    Select
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

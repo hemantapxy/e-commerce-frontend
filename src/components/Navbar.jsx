@@ -62,7 +62,7 @@ export default function Navbar({ token, setToken }) {
         
         {/* Logo Section */}
         <Link to="/" className="flex flex-col items-start leading-none group">
-          <span className="text-xl font-bold italic tracking-tight">Flipkart</span>
+          <span className="text-xl font-bold italic tracking-tight">E-Cart</span>
           <span className="text-[11px] italic font-medium flex items-center gap-0.5 group-hover:underline">
             Explore <span className="text-[#ffe11b] font-bold">Plus</span>
             <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/plus_aef861.png" alt="plus" className="w-2.5 h-2.5" />

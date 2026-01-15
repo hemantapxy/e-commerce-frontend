@@ -20,7 +20,7 @@ export default function ProductCard({ product, token, handleAdd, showActions = t
   const imageSrc = product.image || product.variants?.[0]?.image || "/fallback.png";
 
   return (
-    <div 
+    <div
       onClick={goToDetails}
       className="bg-white dark:bg-gray-900 group border-r border-b border-gray-100 dark:border-gray-800 p-4 flex flex-col cursor-pointer transition-all hover:shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] relative"
     >
@@ -29,7 +29,7 @@ export default function ProductCard({ product, token, handleAdd, showActions = t
         <Heart size={18} />
       </button>
 
-      {/* Image Container */}
+      {/* Image */}
       <div className="h-44 w-full flex items-center justify-center mb-3 overflow-hidden">
         <img
           src={imageSrc}
@@ -44,19 +44,32 @@ export default function ProductCard({ product, token, handleAdd, showActions = t
           {product.name}
         </h3>
 
-        {/* Rating Badge */}
-        <div className="flex items-center gap-2 mt-1 justify-center md:justify-start">
-          <span className="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5">
-            4.2 <Star size={8} fill="currentColor" />
-          </span>
-          <span className="text-gray-400 text-[11px] font-medium">(1,240)</span>
-        </div>
+        {/* ✅ Dynamic Rating */}
+        {product.numReviews > 0 ? (
+          <div className="flex items-center gap-2 mt-1 justify-center md:justify-start">
+            <span className="bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5">
+              {product.averageRating.toFixed(1)}
+              <Star size={8} fill="currentColor" />
+            </span>
+            <span className="text-gray-400 text-[11px] font-medium">
+              ({product.numReviews})
+            </span>
+          </div>
+        ) : (
+          <span className="text-gray-400 text-xs mt-1">No ratings yet</span>
+        )}
 
         {/* Pricing */}
         <div className="mt-2 flex items-center gap-2 justify-center md:justify-start">
-          <span className="text-base font-bold text-gray-900 dark:text-white">₹{product.price}</span>
-          <span className="text-gray-400 line-through text-xs font-medium">₹{Math.round(product.price * 1.3)}</span>
-          <span className="text-green-600 text-xs font-bold italic">30% off</span>
+          <span className="text-base font-bold text-gray-900 dark:text-white">
+            ₹{product.price}
+          </span>
+          <span className="text-gray-400 line-through text-xs font-medium">
+            ₹{Math.round(product.price * 1.3)}
+          </span>
+          <span className="text-green-600 text-xs font-bold italic">
+            30% off
+          </span>
         </div>
       </div>
 

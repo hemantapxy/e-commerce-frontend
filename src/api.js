@@ -51,5 +51,29 @@ export const getProductById = (id) =>
  
 export const submitReview = (productId, review) =>
   API.post(`/products/${productId}/review`, review);
+// ================= FLIGHTS =================
+export const getFlights = (params = {}) =>
+  API.get("/flights", { params });
+
+// Get single flight details
+export const getFlightById = (id) =>
+  API.get(`/flights/${id}`);
+
+// Create booking
+export const createFlightBooking = (data) =>
+  API.post("/bookings", data);
+
+// Get booking details
+export const getFlightBookingById = (id) =>
+  API.get(`/bookings/${id}`);
+// Correct flight payment API calls
+// api.js
+export const createRazorpayFlightPayment = (payload) =>
+  API.post("/payment/flight/create", payload);
+
+
+export const verifyRazorpayFlightPayment = (payload) =>
+  API.post("/payment/flight/verify", payload);
+
 
 export default API;
