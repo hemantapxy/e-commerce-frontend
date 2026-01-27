@@ -3,12 +3,17 @@ import { getCart, removeFromCart } from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
-import { Trash2, FileText, ChevronRight, ShieldCheck, ShoppingBag } from "lucide-react";
+import { Trash2, FileText, ShieldCheck } from "lucide-react";
+
+// ✅ Import Redux
+import { useDispatch } from "react-redux";
+import { removeItem, setCartItems } from "../redux/cartSlice";
 
 export default function CartPage({ token }) {
   const [cart, setCart] = useState({ items: [] });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // ✅ Redux dispatch
 
   useEffect(() => {
     if (!token) {
@@ -23,21 +28,29 @@ export default function CartPage({ token }) {
       .then((res) => {
         const validItems = res.data.items.filter((item) => item.product !== null);
         setCart({ items: validItems });
+        dispatch(setCartItems(validItems)); // ✅ Sync Redux with backend cart
       })
       .catch(() => toast.error("Failed to load cart"))
       .finally(() => setLoading(false));
   };
 
-  const handleRemove = async (id) => {
-    try {
-      const res = await removeFromCart(id, token);
-      const validItems = res.data.items.filter((item) => item.product !== null);
-      setCart({ items: validItems });
-      toast.success("Item removed");
-    } catch (err) {
-      toast.error("Failed to remove item");
-    }
-  };
+const handleRemove = async (id) => {
+  try {
+    const res = await removeFromCart(id, token);
+    const validItems = res.data.items.filter(item => item.product !== null);
+
+    // Update local state
+    setCart({ items: validItems });
+
+    // ✅ Update Redux immediately
+    dispatch(setCartItems(validItems));
+
+    toast.success("Item removed");
+  } catch (err) {
+    toast.error("Failed to remove item");
+  }
+};
+
 
   const downloadInvoice = (item) => {
     if (!item.product) return;
@@ -85,7 +98,6 @@ export default function CartPage({ token }) {
   return (
     <div className="min-h-screen bg-[#f1f3f6] py-4 px-2 md:px-0">
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4">
-        
         {/* LEFT COLUMN: PRODUCT LIST */}
         <div className="flex-1 space-y-3">
           <div className="bg-white p-4 shadow-sm rounded-sm flex justify-between items-center">
@@ -99,7 +111,6 @@ export default function CartPage({ token }) {
           <div className="bg-white shadow-sm rounded-sm overflow-hidden">
             {cart.items.map((item) => (
               <div key={item.product._id} className="p-4 md:p-6 border-b border-gray-100 flex flex-col md:flex-row gap-6">
-                
                 {/* Image Section */}
                 <div 
                   className="w-28 h-28 mx-auto md:mx-0 flex-shrink-0 cursor-pointer"
@@ -122,21 +133,27 @@ export default function CartPage({ token }) {
                   </div>
 
                   <div className="flex flex-wrap gap-4 mt-6">
-                    <button onClick={() => downloadInvoice(item)} 
-                            className="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-blue-600 uppercase">
+                    {/* 🚫 Stop propagation here */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadInvoice(item);
+                      }}
+                      className="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-blue-600 uppercase"
+                    >
                       <FileText size={16} /> Invoice
                     </button>
-                    <button onClick={() => handleRemove(item.product._id)}
-                            className="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-red-600 uppercase">
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemove(item.product._id);
+                      }}
+                      className="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-red-600 uppercase"
+                    >
                       <Trash2 size={16} /> Remove
                     </button>
                   </div>
-                </div>
-
-                {/* Delivery Info */}
-                <div className="hidden md:block text-sm">
-                  <p>Delivery by Sat Jan 11 | <span className="text-green-600 font-bold">Free</span></p>
-                  <p className="text-xs text-gray-500 mt-1">7 Days Replacement Policy</p>
                 </div>
               </div>
             ))}
@@ -181,10 +198,6 @@ export default function CartPage({ token }) {
               <div className="text-green-600 font-bold text-sm bg-green-50 p-2 border border-green-100 rounded-sm">
                 You will save ₹{(subtotal * 0.1).toFixed(0)} on this order
               </div>
-            </div>
-
-            <div className="p-4 flex items-center gap-2 text-gray-500 text-xs font-bold border-t">
-               <ShieldCheck size={20} /> SAFE AND SECURE PAYMENTS. EASY RETURNS.
             </div>
           </div>
         </div>

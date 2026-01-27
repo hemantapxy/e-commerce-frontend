@@ -35,8 +35,10 @@ import Flights from "./Pages/Flights";
 import FlightDetails from "./Pages/FlightDetails";
 import BookingPage from "./Pages/BookingPage";
 import PaymentPage from "./Pages/PaymentPage";
-import TicketPage from "./Pages/TicketPage";           
+import TicketPage from "./Pages/TicketPage";
 import BookingSuccess from "./Pages/BookingSuccess";
+import MyBookings from "./Pages/MyBookings";
+import Wishlist from "./Pages/Wishlist";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -88,15 +90,17 @@ function App() {
         <Route path="/Security" element={<Security />} />
         <Route path="/Privacy" element={<Privacy />} />
         <Route path="/seller" element={<BecomeSeller />} />
-       <Route path="/flights" element={<Flights />} />
-<Route path="/flights/:id" element={<FlightDetails />} />
+        <Route path="/flights" element={<Flights />} />
+        <Route path="/flights/:id" element={<FlightDetails />} />
 
         <Route path="/booking/:id" element={<BookingPage />} />
         <Route path="/payment/:id" element={<PaymentPage />} />
-          <Route path="/ticket" element={<TicketPage />} />
+        <Route path="/ticket" element={<TicketPage />} />
 
-      
+        <Route path="/my-bookings" element={<MyBookings />} />
+
         <Route path="/booking-success" element={<BookingSuccess />} />
+        <Route path="/wishlist" element={<Wishlist />} />
       </Routes>
 
       <Footer />

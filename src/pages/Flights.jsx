@@ -16,7 +16,7 @@ export default function Flights() {
     try {
       const { data } = await getFlights(params);
       setFlights(data);
-    } catch (err) {
+    } catch (err) {       
       console.error(err);
     }
   };
