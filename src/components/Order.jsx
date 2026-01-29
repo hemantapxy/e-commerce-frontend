@@ -13,6 +13,7 @@ export default function Orders() {
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
 
+  // 🔹 Fetch Orders
   useEffect(() => {
     API.get("/order/my")
       .then((res) => {
@@ -28,6 +29,15 @@ export default function Orders() {
       .finally(() => setLoading(false));
   }, []);
 
+  // 🔹 FIX: Scroll to top whenever currentPage changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", // Use "auto" for instant jump, "smooth" for sliding effect
+    });
+  }, [currentPage]);
+
+  // Pagination Logic
   const totalPages = Math.ceil(orders.length / ORDERS_PER_PAGE);
   const paginatedOrders = orders.slice(
     (currentPage - 1) * ORDERS_PER_PAGE,
@@ -53,7 +63,7 @@ export default function Orders() {
   return (
     <div className="min-h-screen bg-[#f1f3f6] pb-10">
       <div className="max-w-[1200px] mx-auto py-4 px-2 md:px-0">
-
+        
         {/* Search Bar */}
         <div className="flex mb-4 bg-white border rounded-sm overflow-hidden">
           <input
@@ -61,15 +71,15 @@ export default function Orders() {
             placeholder="Search your orders here"
             className="flex-1 p-3 text-sm outline-none"
           />
-          <button className="bg-[#2874f0] text-white px-8 flex items-center gap-2 text-sm font-medium hover:bg-blue-700">
+          <button className="bg-[#2874f0] text-white px-8 flex items-center gap-2 text-sm font-medium hover:bg-blue-700 transition-colors">
             <Search size={16} /> <span className="hidden md:inline">Search</span>
           </button>
         </div>
 
-        {/* Orders */}
+        {/* Orders List */}
         <div className="flex flex-col gap-3">
           {paginatedOrders.map((order) => (
-            <div key={order._id} className="bg-white border rounded-sm p-4">
+            <div key={order._id} className="bg-white border rounded-sm p-4 shadow-sm">
               {order.items.map((item, idx) => (
                 <div
                   key={item.product._id || idx}
@@ -78,7 +88,7 @@ export default function Orders() {
                     idx !== 0 ? "mt-6 pt-6 border-t" : ""
                   }`}
                 >
-                  {/* Product */}
+                  {/* Product Info */}
                   <div className="md:col-span-5 flex gap-4">
                     <img
                       src={item.product.image || "https://via.placeholder.com/150"}
@@ -86,10 +96,10 @@ export default function Orders() {
                       className="w-20 h-20 object-contain"
                     />
                     <div>
-                      <h3 className="text-sm group-hover:text-[#2874f0]">
+                      <h3 className="text-sm group-hover:text-[#2874f0] font-medium transition-colors">
                         {item.product.name}
                       </h3>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                      <p className="text-xs text-gray-500 mt-1">Qty: {item.quantity}</p>
                     </div>
                   </div>
 
@@ -103,17 +113,13 @@ export default function Orders() {
                     <div className="flex items-center gap-2">
                       <div
                         className={`w-2 h-2 rounded-full ${
-                          order.status === "delivered"
-                            ? "bg-[#26a541]"
-                            : "bg-[#ff9f00]"
+                          order.status === "delivered" ? "bg-[#26a541]" : "bg-[#ff9f00]"
                         }`}
                       />
                       <span className="text-sm font-semibold">
                         {order.status === "delivered"
                           ? "Delivered"
-                          : `Ordered on ${moment(order.createdAt).format(
-                              "MMM DD, YYYY"
-                            )}`}
+                          : `Ordered on ${moment(order.createdAt).format("MMM DD, YYYY")}`}
                       </span>
                     </div>
                     {order.status === "delivered" && (
@@ -128,7 +134,7 @@ export default function Orders() {
                     <div
                       className="flex items-center gap-2 text-[#2874f0] text-sm font-semibold hover:underline"
                       onClick={(e) => {
-                        e.stopPropagation(); // prevent navigating to product page
+                        e.stopPropagation();
                         navigate(`/product-reviews/${item.product._id}`);
                       }}
                     >
@@ -142,35 +148,37 @@ export default function Orders() {
           ))}
         </div>
 
-        {/* Pagination */}
+        {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center mt-8 gap-4">
+          <div className="flex justify-center items-center mt-8 gap-4 bg-white py-4 border rounded-sm shadow-sm">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
-              className="flex items-center gap-1 text-[#2874f0] text-sm font-semibold disabled:text-gray-300"
+              className="flex items-center gap-1 text-[#2874f0] text-sm font-bold disabled:text-gray-300 transition-colors"
             >
               <ChevronLeft size={18} /> PREVIOUS
             </button>
 
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`w-8 h-8 rounded-full text-xs font-bold ${
-                  currentPage === i + 1
-                    ? "bg-[#2874f0] text-white"
-                    : "hover:bg-gray-200"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            <div className="flex gap-2">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-8 h-8 rounded-full text-xs font-bold transition-all ${
+                    currentPage === i + 1
+                      ? "bg-[#2874f0] text-white"
+                      : "hover:bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
 
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
-              className="flex items-center gap-1 text-[#2874f0] text-sm font-semibold disabled:text-gray-300"
+              className="flex items-center gap-1 text-[#2874f0] text-sm font-bold disabled:text-gray-300 transition-colors"
             >
               NEXT <ChevronRight size={18} />
             </button>
