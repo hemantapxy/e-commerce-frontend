@@ -1,33 +1,71 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  items: [],
-  totalQuantity: 0,
-};
-
 const cartSlice = createSlice({
   name: "cart",
-  initialState,
+  initialState: {
+    items: [],          // [{ productId, variant, quantity }]
+    totalQuantity: 0,   // 🔥 navbar count uses this
+  },
   reducers: {
+    // ✅ Sync cart from backend (on page load / refresh)
     setCartItems: (state, action) => {
       state.items = action.payload;
-      state.totalQuantity = action.payload.reduce((sum, item) => sum + item.quantity, 0);
+
+      state.totalQuantity = action.payload.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
     },
+
+    // ✅ Add to cart (instant navbar update)
     addItem: (state, action) => {
-      const existing = state.items.find(i => i.product._id === action.payload.product._id);
-      if (existing) {
-        existing.quantity += action.payload.quantity;
+      const { productId, variant, quantity } = action.payload;
+
+      const existingItem = state.items.find(
+        (item) =>
+          item.productId === productId &&
+          item.variant === variant
+      );
+
+      if (existingItem) {
+        existingItem.quantity += quantity;
       } else {
-        state.items.push(action.payload);
+        state.items.push({ productId, variant, quantity });
       }
-      state.totalQuantity = state.items.reduce((sum, item) => sum + item.quantity, 0);
+
+      state.totalQuantity += quantity;
     },
+
+    // ✅ Remove item (instant navbar update)
     removeItem: (state, action) => {
-      state.items = state.items.filter(i => i.product._id !== action.payload.productId);
-      state.totalQuantity = state.items.reduce((sum, item) => sum + item.quantity, 0);
+      const { productId } = action.payload;
+
+      const item = state.items.find(
+        (i) => i.productId === productId
+      );
+
+      if (item) {
+        state.totalQuantity -= item.quantity;
+        state.items = state.items.filter(
+          (i) => i.productId !== productId
+        );
+      }
+    },
+
+    // ✅ Clear cart (after order placed / logout)
+    clearCart: (state) => {
+      state.items = [];
+      state.totalQuantity = 0;
     },
   },
 });
 
-export const { setCartItems, addItem, removeItem } = cartSlice.actions;
+// ✅ EXPORT EVERYTHING YOU USE
+export const {
+  setCartItems,
+  addItem,
+  removeItem,
+  clearCart,
+} = cartSlice.actions;
+
 export default cartSlice.reducer;

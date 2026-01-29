@@ -1,144 +1,181 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api";
-import { Package, HelpCircle, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Search, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import moment from "moment";
+
+const ORDERS_PER_PAGE = 5;
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
 
   useEffect(() => {
     API.get("/order/my")
       .then((res) => {
-        // MNC Tip: Data sanitization on the frontend
         const validOrders = (res.data || []).map((order) => ({
           ...order,
-          // Ensure items is always an array and filter out corrupted product links
           items: (order.items || []).filter((item) => item && item.product),
-          // Ensure totalAmount is always a number
-          totalAmount: Number(order.totalAmount) || 0,
         }));
         setOrders(validOrders);
-        setLoading(false);
       })
-      .catch((err) => {
-        console.error("Order Fetch Error:", err);
+      .catch(() => {
         setError("Failed to load orders. Please try again later.");
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
+
+  const totalPages = Math.ceil(orders.length / ORDERS_PER_PAGE);
+  const paginatedOrders = orders.slice(
+    (currentPage - 1) * ORDERS_PER_PAGE,
+    currentPage * ORDERS_PER_PAGE
+  );
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-gray-500 font-medium font-sans">Fetching your orders...</p>
+      <div className="flex justify-center items-center h-screen bg-[#f1f3f6]">
+        <div className="w-10 h-10 border-2 border-[#2874f0] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center mt-20 text-red-500">
-        <AlertCircle size={48} />
-        <p className="mt-4 font-semibold">{error}</p>
-      </div>
-    );
-  }
-
-  if (!orders.length) {
-    return (
-      <div className="max-w-4xl mx-auto mt-20 text-center px-4 font-sans">
-        <div className="bg-blue-50 dark:bg-gray-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Package className="text-blue-600" size={40} />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">No Orders Yet</h2>
-        <p className="text-gray-500 mt-2 mb-8">Looks like you haven't made your choice yet. Start shopping to see your orders here!</p>
-        <Link to="/" className="bg-blue-600 text-white px-8 py-3 rounded-sm font-bold shadow-lg hover:bg-blue-700 transition">
-          CONTINUE SHOPPING
-        </Link>
+      <div className="flex justify-center items-center h-screen text-red-500">
+        {error}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f1f3f6] dark:bg-gray-950 py-8 px-4 font-sans">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
-          My Orders <span className="text-sm font-normal text-gray-500">({orders.length} items)</span>
-        </h2>
+    <div className="min-h-screen bg-[#f1f3f6] pb-10">
+      <div className="max-w-[1200px] mx-auto py-4 px-2 md:px-0">
 
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <div
-              key={order._id}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-sm overflow-hidden hover:shadow-md transition-shadow"
-            >
-              {/* Individual Products within the Order */}
+        {/* Search Bar */}
+        <div className="flex mb-4 bg-white border rounded-sm overflow-hidden">
+          <input
+            type="text"
+            placeholder="Search your orders here"
+            className="flex-1 p-3 text-sm outline-none"
+          />
+          <button className="bg-[#2874f0] text-white px-8 flex items-center gap-2 text-sm font-medium hover:bg-blue-700">
+            <Search size={16} /> <span className="hidden md:inline">Search</span>
+          </button>
+        </div>
+
+        {/* Orders */}
+        <div className="flex flex-col gap-3">
+          {paginatedOrders.map((order) => (
+            <div key={order._id} className="bg-white border rounded-sm p-4">
               {order.items.map((item, idx) => (
-                <div 
-                  key={item.product._id || idx} 
-                  className={`p-5 flex flex-col md:flex-row items-start md:items-center gap-6 ${idx !== 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''}`}
+                <div
+                  key={item.product._id || idx}
+                  onClick={() => navigate(`/product/${item.product._id}`)}
+                  className={`grid grid-cols-1 md:grid-cols-12 gap-4 cursor-pointer group ${
+                    idx !== 0 ? "mt-6 pt-6 border-t" : ""
+                  }`}
                 >
-                  <div className="w-20 h-20 flex-shrink-0 bg-gray-50 rounded-sm p-1">
+                  {/* Product */}
+                  <div className="md:col-span-5 flex gap-4">
                     <img
                       src={item.product.image || "https://via.placeholder.com/150"}
                       alt={item.product.name}
-                      className="w-full h-full object-contain"
+                      className="w-20 h-20 object-contain"
                     />
+                    <div>
+                      <h3 className="text-sm group-hover:text-[#2874f0]">
+                        {item.product.name}
+                      </h3>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                    </div>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm md:text-base font-medium text-gray-900 dark:text-gray-100 truncate hover:text-blue-600 cursor-pointer">
-                      {item.product.name || "Unknown Product"}
-                    </h3>
-                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">
-                      Qty: {item.quantity || 1}
-                    </p>
+                  {/* Price */}
+                  <div className="md:col-span-2 text-sm font-semibold">
+                    ₹{(item.product.price * item.quantity).toLocaleString("en-IN")}
                   </div>
 
-                  <div className="w-32">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">
-                      ₹{((item.product.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}
-                    </p>
-                  </div>
-
-                  <div className="w-full md:w-64 flex items-center gap-2">
-                    {order.paymentStatus === "PAID" ? (
-                      <div className="flex items-center gap-2">
-                         <CheckCircle2 size={16} className="text-green-600" />
-                         <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Order Confirmed</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                         <Clock size={16} className="text-yellow-600" />
-                         {/* <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Processing</span> */}
-                      </div>
+                  {/* Delivery Status */}
+                  <div className="md:col-span-3">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          order.status === "delivered"
+                            ? "bg-[#26a541]"
+                            : "bg-[#ff9f00]"
+                        }`}
+                      />
+                      <span className="text-sm font-semibold">
+                        {order.status === "delivered"
+                          ? "Delivered"
+                          : `Ordered on ${moment(order.createdAt).format(
+                              "MMM DD, YYYY"
+                            )}`}
+                      </span>
+                    </div>
+                    {order.status === "delivered" && (
+                      <p className="text-xs text-gray-600 mt-1 pl-4">
+                        Your item has been delivered
+                      </p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1 text-blue-600 font-bold text-sm cursor-pointer hover:underline">
-                    <HelpCircle size={14} />
-                    <span>Need Help?</span>
+                  {/* Rate & Review */}
+                  <div className="md:col-span-2">
+                    <div
+                      className="flex items-center gap-2 text-[#2874f0] text-sm font-semibold hover:underline"
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevent navigating to product page
+                        navigate(`/product-reviews/${item.product._id}`);
+                      }}
+                    >
+                      <Star size={14} fill="currentColor" />
+                      Rate & Review
+                    </div>
                   </div>
                 </div>
               ))}
-
-              {/* Order Footer - FIXED THE ERROR HERE */}
-              <div className="bg-gray-50 dark:bg-gray-800/50 px-5 py-3 flex justify-between items-center text-xs">
-                 <div className="text-gray-500">
-                    ID: <span className="font-mono">{order._id ? order._id.toUpperCase() : "N/A"}</span>
-                 </div>
-                 {/* <div className="text-gray-700 dark:text-gray-300">
-                    Total Amount: <span className="font-bold text-sm">
-                      ₹{(order.totalAmount ?? 0).toLocaleString('en-IN')}
-                    </span>
-                 </div> */}
-              </div>
             </div>
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center mt-8 gap-4">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="flex items-center gap-1 text-[#2874f0] text-sm font-semibold disabled:text-gray-300"
+            >
+              <ChevronLeft size={18} /> PREVIOUS
+            </button>
+
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`w-8 h-8 rounded-full text-xs font-bold ${
+                  currentPage === i + 1
+                    ? "bg-[#2874f0] text-white"
+                    : "hover:bg-gray-200"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="flex items-center gap-1 text-[#2874f0] text-sm font-semibold disabled:text-gray-300"
+            >
+              NEXT <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

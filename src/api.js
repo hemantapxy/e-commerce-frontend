@@ -51,6 +51,8 @@ export const getProductById = (id) =>
  
 export const submitReview = (productId, review) =>
   API.post(`/products/${productId}/review`, review);
+export const getProductReviews = (productId) =>
+  API.get(`/products/${productId}/reviews`);
 // ================= FLIGHTS =================
 export const getFlights = (params = {}) =>
   API.get("/flights", { params });
@@ -75,5 +77,12 @@ export const createRazorpayFlightPayment = (payload) =>
 export const verifyRazorpayFlightPayment = (payload) =>
   API.post("/payment/flight/verify", payload);
 
+
+// ================= WISHLIST =================
+export const getWishlist = () => API.get("/wishlist");
+export const addToWishlist = (productId) =>
+  API.post("/wishlist/add", { productId });
+export const removeFromWishlist = (productId) =>
+  API.post("/wishlist/remove", { productId });
 
 export default API;

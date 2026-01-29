@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShoppingCart, Zap, Star, ChevronRight, RotateCcw, Truck } from "lucide-react";
-import { getProductById, addToCart, submitReview } from "../api";
+import { getProductById, addToCart } from "../api";
 import { toast } from "react-toastify";
 
 export default function ProductDetails({ token }) {
@@ -12,11 +12,6 @@ export default function ProductDetails({ token }) {
 
   // Selected variant
   const [selectedVariant, setSelectedVariant] = useState(null);
-
-  // Review form
-  const [rating, setRating] = useState(5);
-  const [hoverRating, setHoverRating] = useState(0); // For star hover effect
-  const [comment, setComment] = useState("");
 
   // Zoom State
   const [zoomStyle, setZoomStyle] = useState({ display: "none" });
@@ -52,12 +47,12 @@ export default function ProductDetails({ token }) {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.pageX - left - window.scrollX) / width) * 100;
     const y = ((e.pageY - top - window.scrollY) / height) * 100;
-    
+
     setZoomStyle({
       display: "block",
       backgroundImage: `url(${selectedVariant?.image || product.variants[0]?.image})`,
       backgroundPosition: `${x}% ${y}%`,
-      backgroundSize: "250%", // Magnification
+      backgroundSize: "250%",
     });
   };
 
@@ -81,37 +76,6 @@ export default function ProductDetails({ token }) {
     navigate("/checkout", { state: { product, quantity: 1, variant: selectedVariant } });
   };
 
-  // Submit review (dynamic update)
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!token) return navigate("/login");
-
-    const newReview = {
-      username: "You", // Replace with actual user if available
-      rating,
-      comment,
-    };
-
-    try {
-      // Submit to backend
-      await submitReview(product._id, { rating, comment });
-
-      // Optimistically update frontend
-      setProduct((prev) => {
-        const updatedReviews = [newReview, ...prev.reviews];
-        const avg = updatedReviews.reduce((sum, r) => sum + r.rating, 0) / updatedReviews.length;
-        return { ...prev, reviews: updatedReviews, averageRating: avg };
-      });
-
-      setComment("");
-      setRating(5);
-      toast.success("Review submitted!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit review");
-    }
-  };
-
   if (loading)
     return (
       <div className="flex justify-center items-center h-[100vh] bg-white">
@@ -125,7 +89,7 @@ export default function ProductDetails({ token }) {
   return (
     <div className="min-h-screen bg-[#f1f3f6] pb-10 font-sans text-[#212121]">
       <div className="max-w-[1244px] mx-auto bg-white shadow-sm flex flex-col md:flex-row gap-0">
-        
+
         {/* LEFT COLUMN: Gallery & Buttons */}
         <div className="md:w-[42%] p-3 md:p-6 border-r border-gray-100 relative">
           <div className="md:sticky md:top-20 z-30">
@@ -133,7 +97,7 @@ export default function ProductDetails({ token }) {
               {/* Vertical Thumbnails */}
               <div className="order-2 md:order-1 flex md:flex-col gap-2">
                 {product.variants.map((v, i) => (
-                  <div 
+                  <div
                     key={i}
                     onMouseEnter={() => setSelectedVariant(v)}
                     className={`w-14 h-16 border p-1 cursor-pointer flex items-center justify-center overflow-hidden transition-all ${
@@ -146,7 +110,7 @@ export default function ProductDetails({ token }) {
               </div>
 
               {/* Main Preview Image with Side Zoom */}
-              <div 
+              <div
                 className="order-1 md:order-2 flex-1 border border-gray-100 p-4 h-[450px] flex items-center justify-center relative bg-white cursor-crosshair"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setZoomStyle({ display: "none" })}
@@ -158,12 +122,12 @@ export default function ProductDetails({ token }) {
                 />
 
                 {/* SIDE ZOOM WINDOW */}
-                <div 
+                <div
                   className="absolute left-[103%] top-0 w-[500px] h-[500px] border border-gray-200 bg-white z-[100] hidden lg:block shadow-2xl"
-                  style={{ 
-                    ...zoomStyle, 
+                  style={{
+                    ...zoomStyle,
                     backgroundRepeat: "no-repeat",
-                    pointerEvents: "none" 
+                    pointerEvents: "none"
                   }}
                 />
               </div>
@@ -221,7 +185,7 @@ export default function ProductDetails({ token }) {
           </div>
 
           <div className="mt-4">
-             {selectedVariant && (
+            {selectedVariant && (
               <p className={`text-sm font-bold ${selectedVariant.stock > 0 ? "text-green-600" : "text-red-500"}`}>
                 {selectedVariant.stock > 0 ? `In Stock: ${selectedVariant.stock}` : "Out of Stock"}
               </p>
@@ -241,7 +205,7 @@ export default function ProductDetails({ token }) {
                     }`}
                   >
                     <div className="w-full h-full" style={{ backgroundColor: v.color }}>
-                       <img src={v.image} className="w-full h-full object-contain opacity-80" alt="" />
+                      <img src={v.image} className="w-full h-full object-contain opacity-80" alt="" />
                     </div>
                   </button>
                 ))}
@@ -273,50 +237,6 @@ export default function ProductDetails({ token }) {
               <h3 className="text-lg font-bold uppercase text-gray-600 tracking-wider text-[14px]">Ratings & Reviews</h3>
             </div>
 
-            {/* Review Form */}
-            {token && (
-              <form onSubmit={handleSubmitReview} className="p-4 bg-white border-b space-y-4">
-                <div className="flex flex-col gap-2">
-                  <span className="text-sm font-bold text-gray-600 uppercase text-[12px]">Rate this product</span>
-                  <div className="flex items-center gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => setRating(star)}
-                        className="transition-transform active:scale-90"
-                      >
-                        <Star 
-                          size={28} 
-                          fill={(hoverRating || rating) >= star ? "#388e3c" : "none"} 
-                          stroke={(hoverRating || rating) >= star ? "#388e3c" : "#abb0b5"}
-                          strokeWidth={1.5}
-                        />
-                      </button>
-                    ))}
-                    <span className="ml-2 text-sm font-bold text-gray-500">
-                      {["Poor", "Fair", "Good", "Very Good", "Excellent"][(hoverRating || rating) - 1]}
-                    </span>
-                  </div>
-                </div>
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Review this product..."
-                  className="w-full border p-3 rounded-sm text-sm outline-none focus:border-[#2874f0] bg-[#fcfcfc]"
-                  rows={3}
-                />
-                <button
-                  type="submit"
-                  className="bg-[#2874f0] text-white px-8 py-2.5 rounded-sm font-bold shadow-md hover:shadow-lg transition text-sm uppercase"
-                >
-                  Submit Review
-                </button>
-              </form>
-            )}
-
             {/* Reviews List */}
             <div className="p-0">
               {product.reviews && product.reviews.length > 0 ? (
@@ -332,7 +252,7 @@ export default function ProductDetails({ token }) {
                   </div>
                 ))
               ) : (
-                <p className="p-6 text-gray-400 text-sm text-center italic">No reviews yet. Be the first to review!</p>
+                <p className="p-6 text-gray-400 text-sm text-center italic">No reviews yet.</p>
               )}
             </div>
           </div>

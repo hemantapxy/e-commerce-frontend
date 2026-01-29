@@ -1,67 +1,49 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import api from "../api";
+import ProductCard from "../components/ProductCard";
+import { Heart } from "lucide-react";
 
 export default function Wishlist() {
-  const navigate = useNavigate();
-  const [wishlist, setWishlist] = useState([]);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load wishlist from localStorage
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("wishlistFlights")) || [];
-    setWishlist(saved);
+    api.get("/wishlist")
+      .then((res) => {
+        const validItems = res.data.items.filter(
+          (i) => i.product !== null
+        );
+        setItems(validItems);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setLoading(false));
   }, []);
 
-  // Remove flight
-  const removeFromWishlist = (id) => {
-    const updated = wishlist.filter((flight) => flight._id !== id);
-    localStorage.setItem("wishlistFlights", JSON.stringify(updated));
-    setWishlist(updated);
-  };
+  if (loading) {
+    return <div className="text-center mt-20">Loading...</div>;
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center mt-24 text-gray-500">
+        <Heart size={48} className="mb-4 text-gray-300" />
+        <h2 className="text-lg font-semibold">Your wishlist is empty ❤️</h2>
+        <p className="text-sm mt-1">
+          Save items you like by tapping the heart icon
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-2xl font-bold mb-6">Wishlist ✈️ (Demo)</h1>
-
-      {wishlist.length === 0 ? (
-        <p className="text-gray-500 text-center mt-20">
-          No flights in wishlist
-        </p>
-      ) : (
-        <div className="space-y-4">
-          {wishlist.map((flight) => (
-            <div
-              key={flight._id}
-              className="bg-white p-5 rounded shadow flex justify-between items-center"
-            >
-              <div>
-                <h2 className="font-bold text-lg">{flight.airline}</h2>
-                <p className="text-sm text-gray-500">
-                  {flight.from} → {flight.to}
-                </p>
-                <p className="font-semibold mt-1">₹{flight.price}</p>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() =>
-                    navigate(`/flights/${flight._id}`, { state: { flight } })
-                  }
-                  className="bg-orange-500 text-white px-4 py-2 text-sm rounded"
-                >
-                  Book
-                </button>
-
-                <button
-                  onClick={() => removeFromWishlist(flight._id)}
-                  className="bg-red-500 text-white px-4 py-2 text-sm rounded"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="max-w-[1200px] mx-auto p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+      {items.map((item) => (
+        <ProductCard
+          key={item.product._id}
+          product={item.product}
+          showActions={false}
+        />
+      ))}
     </div>
   );
 }

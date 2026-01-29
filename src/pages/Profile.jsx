@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../api";
-import { User, Package, CreditCard, Power, ChevronRight, ShieldCheck, MapPin } from "lucide-react";
+import { Package, Power, ChevronRight, User } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Profile() {
@@ -30,137 +30,144 @@ export default function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await api.put("/user/profile", user);
-    alert("Changes Saved");
+
+    // 10-Digit Mobile Number Validation
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(user.phone)) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    try {
+      await api.put("/user/profile", user);
+      alert("Changes Saved Successfully");
+    } catch (err) {
+      alert("Failed to save changes");
+    }
+  };
+
+  // Helper to allow only numbers in the phone input
+  const handlePhoneChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+    if (value.length <= 10) {
+      setUser({ ...user, phone: value });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[#111]">
-      {/* Breadcrumb - Classic Amazon */}
-      <div className="max-w-5xl mx-auto px-4 py-4 text-xs text-[#565959]">
-        Your Account <span className="mx-1">›</span> <span className="text-[#c45500]">Login & Security</span>
+    <div className="min-h-screen bg-[#f1f3f6] font-sans text-[#111] pb-10">
+      {/* Breadcrumb */}
+      <div className="max-w-6xl mx-auto px-4 py-4 text-xs text-gray-500">
+        Account <span className="mx-1">›</span> <span className="text-gray-900 font-semibold">Profile Information</span>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 pb-12">
-        <h1 className="text-3xl font-normal mb-6">Login & Security</h1>
-
-        <div className="grid grid-cols-12 gap-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-12 gap-4">
           
-          {/* LEFT SIDEBAR - Navigation List */}
-          <div className="col-span-12 md:col-span-4 lg:col-span-3">
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 p-4 border-b border-gray-200">
-                <h3 className="font-bold text-sm">Your Account</h3>
+          {/* LEFT SIDEBAR */}
+          <div className="col-span-12 md:col-span-3">
+            <div className="bg-white p-3 flex items-center gap-4 mb-4 shadow-sm rounded-sm">
+              <div className="w-12 h-12 bg-[#2874f0] rounded-full flex items-center justify-center text-white">
+                <User size={24} />
               </div>
+              <div>
+                <p className="text-xs text-gray-500">Hello,</p>
+                <p className="font-bold text-[16px] truncate">{user.username}</p>
+              </div>
+            </div>
+
+            <div className="bg-white shadow-sm rounded-sm overflow-hidden">
               <ul className="text-sm">
-                <Link to="/orders" className="flex items-center justify-between p-3 border-b border-gray-100 hover:bg-gray-50 group">
+                <Link to="/orders" className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-[#f1f3f6] group transition-colors">
                   <div className="flex items-center gap-3">
-                    <Package size={18} className="text-gray-600" />
-                    <span className="text-gray-700">Your Orders</span>
+                    <Package size={20} className="text-[#2874f0]" />
+                    <span className="text-gray-600 font-bold uppercase text-[14px]">My Orders</span>
                   </div>
-                  <ChevronRight size={14} className="text-gray-400" />
+                  <ChevronRight size={18} className="text-gray-400 group-hover:text-[#2874f0]" />
                 </Link>
-                <li className="flex items-center gap-3 p-3 border-b border-gray-100 bg-[#f3f7f8] border-l-4 border-[#e47911]">
-                  <ShieldCheck size={18} className="text-[#e47911]" />
-                  <span className="font-bold">Login & Security</span>
-                </li>
-                <li className="flex items-center gap-3 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
-                  <MapPin size={18} className="text-gray-600" />
-                  <span className="text-gray-700">Your Addresses</span>
-                </li>
-                <li className="flex items-center gap-3 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
-                  <CreditCard size={18} className="text-gray-600" />
-                  <span className="text-gray-700">Payments</span>
-                </li>
+
                 <div 
                   onClick={handleLogout}
-                  className="flex items-center gap-3 p-3 hover:bg-red-50 cursor-pointer text-red-700 mt-4 border-t border-gray-100"
+                  className="flex items-center gap-3 p-4 hover:bg-red-50 cursor-pointer text-gray-600 transition-colors"
                 >
-                  <Power size={18} />
-                  <span className="font-medium uppercase text-xs">Sign Out</span>
+                  <Power size={20} className="text-[#2874f0]" />
+                  <span className="font-bold uppercase text-[14px]">Logout</span>
                 </div>
               </ul>
             </div>
           </div>
 
-          {/* RIGHT CONTENT - The Data Grid */}
-          <div className="col-span-12 md:col-span-8 lg:col-span-9">
-            <div className="border border-gray-200 rounded-lg">
+          {/* RIGHT CONTENT */}
+          <div className="col-span-12 md:col-span-9">
+            <div className="bg-white shadow-sm rounded-sm p-6 md:p-8">
+              <h2 className="text-[18px] font-bold mb-8">Personal Information</h2>
               
-              {/* Field 1: Name */}
-              <div className="p-5 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold">Name:</label>
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="max-w-md">
+                  <label className="block text-sm text-gray-700 mb-2">Full Name</label>
                   <input 
                     type="text" 
-                    className="mt-1 w-full max-w-xs border border-gray-400 px-2 py-1 rounded shadow-inner focus:border-[#e77600] focus:shadow-[0_0_3px_2px_rgba(228,121,17,0.5)] outline-none"
+                    className="w-full border border-gray-300 px-4 py-2.5 rounded-sm outline-none focus:border-[#2874f0] text-sm"
                     value={user.username}
                     onChange={(e) => setUser({...user, username: e.target.value})}
+                    required
                   />
                 </div>
-                <button className="text-sm bg-gray-100 border border-gray-300 px-6 py-1 rounded-md shadow-sm hover:bg-gray-200">Edit</button>
-              </div>
 
-              {/* Field 2: Email */}
-              <div className="p-5 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold">Email:</label>
-                  <p className="text-sm text-gray-700 mt-1">{user.email}</p>
+                <div className="max-w-md">
+                  <label className="block text-sm text-gray-700 mb-2">Email Address</label>
+                  <input 
+                    type="email" 
+                    disabled
+                    className="w-full border border-gray-200 bg-gray-50 px-4 py-2.5 rounded-sm text-sm text-gray-500 cursor-not-allowed"
+                    value={user.email}
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1 italic">Email cannot be changed.</p>
                 </div>
-                <span className="text-xs text-gray-500 italic">Primary</span>
-              </div>
 
-              {/* Field 3: Phone */}
-              <div className="p-5 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold">Mobile Phone Number:</label>
+                <div className="max-w-md">
+                  <label className="block text-sm text-gray-700 mb-2">Mobile Number</label>
                   <input 
                     type="text" 
-                    className="mt-1 w-full max-w-xs border border-gray-400 px-2 py-1 rounded shadow-inner outline-none"
+                    placeholder="10-digit mobile number"
+                    className={`w-full border px-4 py-2.5 rounded-sm outline-none text-sm transition-colors ${
+                        user.phone.length > 0 && user.phone.length < 10 
+                        ? "border-red-500" 
+                        : "border-gray-300 focus:border-[#2874f0]"
+                    }`}
                     value={user.phone}
-                    onChange={(e) => setUser({...user, phone: e.target.value})}
+                    onChange={handlePhoneChange}
+                    required
+                  />
+                  {user.phone.length > 0 && user.phone.length < 10 && (
+                    <p className="text-[11px] text-red-500 mt-1">Must be exactly 10 digits.</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-700 mb-2">Shipping Address</label>
+                  <textarea 
+                    className="w-full border border-gray-300 p-4 rounded-sm h-32 text-sm outline-none focus:border-[#2874f0]"
+                    placeholder="Enter your full delivery address..."
+                    value={user.address}
+                    onChange={(e) => setUser({...user, address: e.target.value})}
+                    required
                   />
                 </div>
-                <button className="text-sm bg-gray-100 border border-gray-300 px-6 py-1 rounded-md shadow-sm hover:bg-gray-200">Change</button>
-              </div>
 
-              {/* Field 4: Address */}
-              <div className="p-5 flex flex-col gap-2">
-                <label className="block text-sm font-bold">Default Shipping Address:</label>
-                <textarea 
-                  className="w-full border border-gray-400 p-2 rounded shadow-inner h-24 text-sm outline-none"
-                  value={user.address}
-                  onChange={(e) => setUser({...user, address: e.target.value})}
-                />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-8 flex justify-center border-t border-gray-200 pt-8">
-              <button 
-                onClick={handleSubmit}
-                className="bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] rounded-lg px-12 py-2 text-sm font-medium shadow-md transition-all active:scale-95"
-              >
-                Done
-              </button>
-            </div>
-
-            {/* Security Footer */}
-            <div className="mt-12 bg-gray-50 border border-gray-200 rounded p-6">
-                <h4 className="text-sm font-bold mb-2">Secure your account</h4>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                    Make sure you're taking advantage of the latest security features. 
-                    Amazon recommends enabling 2-Step Verification to prevent unauthorized access.
-                </p>
-                <button className="mt-4 text-sm text-blue-700 hover:text-orange-700 hover:underline">
-                    Enable 2-Step Verification
-                </button>
+                <div className="pt-4">
+                  <button 
+                    type="submit"
+                    className="bg-[#fb641b] hover:bg-[#f4511e] text-white px-10 py-3 text-sm font-bold uppercase rounded-sm shadow-md transition-all active:scale-95"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-
         </div>
       </div>
     </div>
   );
 }
-  

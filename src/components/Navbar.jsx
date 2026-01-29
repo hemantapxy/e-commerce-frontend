@@ -3,42 +3,75 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Search,
   ShoppingCart,
-  UserCircle,
   ChevronDown,
   Package,
   Heart,
   LogOut,
-  Store
+  UserCircle,
+  Store,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 import api from "../api";
-import { useSelector } from "react-redux"; // ✅ Redux selector
 
 export default function Navbar({ token, setToken }) {
   const navigate = useNavigate();
-
   const [search, setSearch] = useState("");
   const [username, setUsername] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const dropdownRef = useRef();
+  const [historyVisible, setHistoryVisible] = useState(false);
+  const [history, setHistory] = useState([]);
 
-  // ✅ Get live cart count from Redux
+  const dropdownRef = useRef();
+  const searchRef = useRef();
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
 
-  // Fetch user profile
   useEffect(() => {
     if (token) {
-      api.get("/user/profile")
+      api
+        .get("/user/profile")
         .then((res) => setUsername(res.data.username || "User"))
-        .catch(() => setUsername(""));
+        .catch(() => setUsername("User"));
     }
   }, [token]);
 
-  // Close dropdown on outside click
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("searchHistory")) || [];
+    setHistory(saved);
+  }, []);
+
+  const saveToHistory = (query) => {
+    let updated = [query, ...history.filter((h) => h !== query)];
+    updated = updated.slice(0, 10);
+    setHistory(updated);
+    localStorage.setItem("searchHistory", JSON.stringify(updated));
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+    saveToHistory(search.trim());
+    navigate(`/search?query=${encodeURIComponent(search.trim())}`);
+    setHistoryVisible(false);
+  };
+
+  const handleSuggestionClick = (query) => {
+    setSearch(query);
+    saveToHistory(query);
+    navigate(`/search?query=${encodeURIComponent(query)}`);
+    setHistoryVisible(false);
+  };
+
+  const filteredHistory = history.filter((h) =>
+    h.toLowerCase().includes(search.toLowerCase())
+  );
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setHistoryVisible(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -48,104 +81,115 @@ export default function Navbar({ token, setToken }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setToken("");
-    setUsername("");
+    setDropdownOpen(false);
     navigate("/login");
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (!search.trim()) return;
-    navigate(`/search?query=${encodeURIComponent(search.trim())}`);
-    setSuggestions([]);
-  };
-
   return (
-    <nav className="sticky top-0 z-[100] w-full bg-[#2874f0] text-white py-3 shadow-md">
-      <div className="max-w-[1248px] mx-auto px-4 flex items-center gap-8">
-
-        {/* Logo */}
-        <Link to="/" className="flex flex-col items-start leading-none group">
-          <span className="text-xl font-bold italic tracking-tight">E-Cart</span>
-          <span className="text-[11px] italic font-medium flex items-center gap-0.5 group-hover:underline">
-            Explore <span className="text-[#ffe11b] font-bold">Plus</span>
-            <img
-              src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/plus_aef861.png"
-              alt="plus"
-              className="w-2.5 h-2.5"
-            />
+    <nav className="sticky top-0 z-50 w-full bg-[#2874f0] text-white py-2.5">
+      <div className="max-w-[1248px] mx-auto px-4 flex items-center gap-4 md:gap-12">
+        
+        {/* LOGO SECTION */}
+        <Link to="/" className="flex flex-col items-end leading-none">
+          <span className="text-xl font-bold italic tracking-tight">Flipkart</span>
+          <span className="text-[11px] italic font-medium flex items-center gap-0.5">
+            Explore <span className="text-yellow-400 font-bold">Plus</span>
+            <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/plus-brand-bc170b.svg" alt="plus" className="w-3" />
           </span>
         </Link>
 
-        {/* Search */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-[600px] relative">
-          <div className="flex items-center bg-white rounded-sm overflow-hidden shadow-sm">
+        {/* SEARCH BAR */}
+        <div className="flex-1 max-w-[564px] relative" ref={searchRef}>
+          <form onSubmit={handleSearchSubmit} className="flex bg-white rounded-sm shadow-sm overflow-hidden">
             <input
               type="text"
               placeholder="Search for products, brands and more"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-9 px-4 text-gray-800 text-sm focus:outline-none"
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setHistoryVisible(true);
+              }}
+              onFocus={() => setHistoryVisible(true)}
+              className="w-full h-9 px-4 text-[14px] text-black outline-none placeholder-gray-500"
             />
             <button type="submit" className="px-3 text-[#2874f0]">
               <Search size={20} strokeWidth={2.5} />
             </button>
-          </div>
-        </form>
+          </form>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-8">
+          {/* SEARCH HISTORY DROPDOWN */}
+          {historyVisible && history.length > 0 && (
+            <div className="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl mt-0.5 z-50 rounded-b-sm overflow-hidden text-black">
+              {(search ? filteredHistory : history).map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleSuggestionClick(item)}
+                  className="px-4 py-2.5 hover:bg-[#f1f3f6] cursor-pointer text-[14px] flex items-center gap-3"
+                >
+                  <Search size={16} className="text-gray-400" />
+                  <span className="truncate">{item}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {/* Login / User */}
+        {/* ACTIONS SECTION */}
+        <div className="flex items-center gap-6 md:gap-10">
+          
+          {/* USER DROPDOWN / LOGIN */}
           {!token ? (
             <Link
               to="/login"
-              className="bg-white text-[#2874f0] px-8 py-1 font-bold rounded-sm hover:bg-gray-100"
+              className="bg-white text-[#2874f0] px-9 py-0.5 text-[15px] font-bold rounded-sm hover:bg-gray-50"
             >
               Login
             </Link>
           ) : (
-            <div ref={dropdownRef} className="relative">
+            <div 
+              className="relative group" 
+              ref={dropdownRef}
+              onMouseEnter={() => setDropdownOpen(true)}
+              onMouseLeave={() => setDropdownOpen(false)}
+            >
               <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-1 font-bold py-2"
+                className={`flex items-center gap-1 font-bold text-[15px] hover:text-white h-full py-2 transition-all ${dropdownOpen ? 'text-white' : ''}`}
               >
                 {username}
-                <ChevronDown
-                  size={14}
-                  className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
-                />
+                <ChevronDown size={14} className={`transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
+              {/* DROPDOWN MENU */}
               {dropdownOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 w-60 bg-white text-gray-800 shadow-2xl mt-1 border py-1">
+                <div className="absolute top-full -right-10 bg-white text-black shadow-2xl mt-0 w-60 rounded-sm overflow-hidden">
+                  <div className="absolute -top-2 right-12 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100"></div>
                   <DropdownLink to="/profile" icon={<UserCircle size={18} />} label="My Profile" />
                   <DropdownLink to="/orders" icon={<Package size={18} />} label="Orders" />
                   <DropdownLink to="/wishlist" icon={<Heart size={18} />} label="Wishlist" />
                   <DropdownLink to="/my-bookings" icon={<Store size={18} />} label="My Bookings" />
-                  <div className="border-t my-1" />
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-4 px-4 py-3 hover:bg-gray-50 text-sm"
+                    className="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-[#f1f3f6] text-[14px] border-t border-gray-100"
                   >
-                    <LogOut size={18} className="text-[#2874f0]" /> Logout
+                    <LogOut size={18} className="text-[#2874f0]" />
+                    <span>Logout</span>
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {/* Seller */}
-          <Link to="/seller" className="hidden lg:flex items-center gap-2 font-bold">
-            <Store size={18} />
+          {/* BECOME A SELLER (Classic Flipkart) */}
+          <Link to="/seller" className="hidden lg:block font-bold text-[15px]">
             Become a Seller
           </Link>
 
-          {/* Cart */}
-          <Link to="/cart" className="flex items-center gap-2 font-bold">
+          {/* CART */}
+          <Link to="/cart" className="flex items-center gap-2 font-bold text-[15px] hover:text-white transition-colors">
             <div className="relative">
-              <ShoppingCart size={20} />
-              {totalQuantity > 0 && (  // ✅ Use Redux live count
-                <span className="absolute -top-2 -right-2 bg-[#ff6161] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border border-white">
+              <ShoppingCart size={20} strokeWidth={2.5} />
+              {totalQuantity > 0 && (
+                <span className="absolute -top-2.5 -right-2.5 bg-[#ff6161] text-white text-[10px] min-w-[18px] h-[18px] px-1 rounded-full border-2 border-[#2874f0] flex items-center justify-center font-bold">
                   {totalQuantity}
                 </span>
               )}
@@ -159,15 +203,14 @@ export default function Navbar({ token, setToken }) {
   );
 }
 
-// Dropdown helper
 function DropdownLink({ to, icon, label }) {
   return (
     <Link
       to={to}
-      className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 text-sm border-b last:border-0"
+      className="flex items-center gap-4 px-4 py-3.5 hover:bg-[#f1f3f6] text-[14px] border-b border-gray-50 transition-colors"
     >
       <span className="text-[#2874f0]">{icon}</span>
-      {label}
+      <span className="text-gray-800">{label}</span>
     </Link>
   );
 }

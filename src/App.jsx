@@ -39,6 +39,8 @@ import TicketPage from "./Pages/TicketPage";
 import BookingSuccess from "./Pages/BookingSuccess";
 import MyBookings from "./Pages/MyBookings";
 import Wishlist from "./Pages/Wishlist";
+import ProductReviews from "./Pages/ProductReviews";
+
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -57,6 +59,7 @@ function App() {
       localStorage.setItem("theme", "light");
     }
   }, [dark]);
+  const [user, setUser] = React.useState(JSON.parse(localStorage.getItem("user")));
 
   return (
     <Router>
@@ -101,6 +104,12 @@ function App() {
 
         <Route path="/booking-success" element={<BookingSuccess />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route
+          path="/product-reviews/:id"
+          element={<ProductReviews user={user} token={token} />}
+        />
+
+
       </Routes>
 
       <Footer />
